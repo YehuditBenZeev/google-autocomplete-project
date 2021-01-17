@@ -8,7 +8,9 @@ def search_cln():
     print("System is ready, enter text")
     text = input()
     while text != '#':    
-        get_best_k_completions(text)
+        sentence_suggestion_list = get_best_k_completions(text)
+        for s in set(sentence_suggestion_list):
+            print(s)
         print(text)
         text = input()
     # completions = get_best_k_completions(text)

@@ -21,13 +21,11 @@ class Tree:
         into it by extending the structure as required"""
         for letter in data_sentences:
             self.insert(letter)  # inserting one key to the trie.
-        
 
     def insert(self, sentence):
         """Inserts a key into trie if it does not exist already.
         And if the key is a prefix of the trie node, just
         marks it as leaf node."""
-
 
         node_current = self.root
         node_father = self.root
@@ -49,15 +47,14 @@ class Tree:
 
         node_current.last = True
 
-
-    def search(self, key_):
+    def search(self, sentence):
         # Searches the given key in trie for a full match
         # and returns True on success else returns False.
         node = self.root
         found = True
 
         # for a in list(key):
-        for i, a in enumerate(key_):
+        for i, a in enumerate(sentence):
             print(i, ", ", a, end=", ")
             if not node.children.get(a):
                 found = False
@@ -68,55 +65,52 @@ class Tree:
 
         return node and node.last and found
 
-
-    def suggestionsRecBackwords(self, node, word):
+    def suggestions_rec_backwards(self, node, sentence):
         if node.father is None:
-            return node.father_letter + word
+            return node.father_letter + sentence
 
-        return self.suggestionsRecBackwords(node.father, node.father_letter + word)
+        return self.suggestions_rec_backwards(node.father, node.father_letter + sentence)
 
-    def suggestionsRec(self, original_node, node, word):
+    def suggestions_rec(self, original_node, node, sentence):
         if node.last:
-            prefix = self.suggestionsRecBackwords(original_node, '')
-            sentence = prefix + word
-            self.sentence_list.append(sentence)
+            prefix = self.suggestions_rec_backwards(original_node, '')
+            full_sentence = prefix + sentence
+            self.sentence_list.append(full_sentence)
 
-        for a, n in node.children.items():
-            self.suggestionsRec(original_node, n, word + a)
+        for letter, n in node.children.items():
+            self.suggestions_rec(original_node, n, sentence + letter)
 
-    def printAllAutoSuggestions(self, sentence):
-        return_value = 1
-        for node in self.positions[sentence[0]]:
-            temp_root = TrieNode()
-            temp_root.children[sentence[0]] = node
-            return_value = self.printAutoSuggestions(sentence, temp_root)
-            # if return_value == 1:
-            #     break
-        for s in set(self.sentence_list):
-            print(s)
-        return return_value
+    def get_all_auto_suggestions(self, sentence):
+        self.sentence_list = []
+        if self.positions.get(sentence[0]):
+            for node in self.positions[sentence[0]]:
+                temp_root = TrieNode()
+                temp_root.children[sentence[0]] = node
+                self.get_node_auto_suggestions(sentence, temp_root)
 
-    def printAutoSuggestions(self, key_, node):
+        return self.sentence_list
+
+    def get_node_auto_suggestions(self, sentence, node):
         # Returns all the words in the trie whose common
         # prefix is the given key thus listing out all
         # the suggestions for autocomplete.
 
         not_found = False
         temp_word = ''
-        first_node = node.children.get(key_[0])
+        first_node = node.children.get(sentence[0])
         # for a in list(key_):
-        for i, a in enumerate(key_):
-            if not node.children.get(a):
+        for i, letter in enumerate(sentence):
+            if not node.children.get(letter):
                 not_found = True
                 break
 
-            temp_word += a
-            node = node.children[a]
+            temp_word += letter
+            node = node.children[letter]
         if not_found:
             return 0
         elif node.last and not node.children:
             return -1
-        self.suggestionsRec(first_node, node, temp_word)
+        self.suggestions_rec(first_node, node, temp_word)
 
         return 1
 
