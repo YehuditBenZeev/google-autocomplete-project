@@ -7,7 +7,10 @@ def search_cln():
     create_tree()
     print("System is ready, enter text")
     text = input()
-    get_best_k_completions(text)
+    while text != '#':    
+        get_best_k_completions(text)
+        print(text)
+        text = input()
     # completions = get_best_k_completions(text)
     # print_completions(completions)
 

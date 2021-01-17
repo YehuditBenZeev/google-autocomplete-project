@@ -15,17 +15,18 @@ class Tree:
         self.sentence_list = []
         self.positions = {}
 
-    def formTree(self, keys_):
-        # Forms a trie structure with the given set of strings
-        # if it does not exists already else it merges the key
-        # into it by extending the structure as required
-        for key_ in keys_:
-            self.insert(key_)  # inserting one key to the trie.
+    def formTree(self, data_sentences):
+        """ Forms a trie structure with the given set of strings
+        if it does not exists already else it merges the key
+        into it by extending the structure as required"""
+        for letter in data_sentences:
+            self.insert(letter)  # inserting one key to the trie.
+        
 
     def insert(self, sentence):
-        # Inserts a key into trie if it does not exist already.
-        # And if the key is a prefix of the trie node, just
-        # marks it as leaf node.
+        """Inserts a key into trie if it does not exist already.
+        And if the key is a prefix of the trie node, just
+        marks it as leaf node."""
 
 
         node_current = self.root
@@ -35,10 +36,11 @@ class Tree:
             if not node_current.children.get(letter):
                 node_current.children[letter] = TrieNode()
 
+            node_current = node_current.children[letter]
             node_current.father = node_father
             node_current.father_letter = father_letter
-            node_father = node_current
-            node_current = node_current.children[letter]
+
+            node_father = node_current           
             father_letter = letter
 
             if not (letter in self.positions.keys()):
@@ -46,6 +48,7 @@ class Tree:
             self.positions[letter].add(node_current)
 
         node_current.last = True
+
 
     def search(self, key_):
         # Searches the given key in trie for a full match
@@ -67,7 +70,7 @@ class Tree:
 
 
     def suggestionsRecBackwords(self, node, word):
-        if node.father == self.root:
+        if node.father is None:
             return node.father_letter + word
 
         return self.suggestionsRecBackwords(node.father, node.father_letter + word)
@@ -75,7 +78,7 @@ class Tree:
     def suggestionsRec(self, original_node, node, word):
         if node.last:
             prefix = self.suggestionsRecBackwords(original_node, '')
-            sentence = prefix[:-2] + word
+            sentence = prefix + word
             self.sentence_list.append(sentence)
 
         for a, n in node.children.items():
@@ -87,9 +90,9 @@ class Tree:
             temp_root = TrieNode()
             temp_root.children[sentence[0]] = node
             return_value = self.printAutoSuggestions(sentence, temp_root)
-            if return_value == 1:
-                break
-        for s in self.sentence_list:
+            # if return_value == 1:
+            #     break
+        for s in set(self.sentence_list):
             print(s)
         return return_value
 
@@ -98,10 +101,9 @@ class Tree:
         # prefix is the given key thus listing out all
         # the suggestions for autocomplete.
 
-        # node = self.root
         not_found = False
         temp_word = ''
-
+        first_node = node.children.get(key_[0])
         # for a in list(key_):
         for i, a in enumerate(key_):
             if not node.children.get(a):
@@ -114,16 +116,15 @@ class Tree:
             return 0
         elif node.last and not node.children:
             return -1
-        print("132")
-        self.suggestionsRec(node, node, temp_word)
+        self.suggestionsRec(first_node, node, temp_word)
 
         return 1
 
 
 if __name__ == "__main__":
     # Driver Code
-    keys = ["hello dog", "dog", "t dog hell", "cat", "a",  # "t dog hell"
-            "hel", "help", "helps", "helping"]  # keys to form the trie structure.
+    keys = ["dog dog"]#["hello dog", "t dog hell", "dog", "dog hi", "doggi dog"]
+            #"hel", "help", "helps", "helping"]  # keys to form the trie structure.
     key = "do"  # key for autocomplete suggestions.
     status = ["Not found", "Found"]
 

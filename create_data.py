@@ -2,13 +2,13 @@ import sys, os
 from _pytest.tmpdir import tmp_path
 sys.path.append(os.path.dirname(os.path.abspath("../Aechive/rfc7501.txt")))
 from tree import Tree
-
+from config import file_path
 
 tree = Tree()
 
 
 def create_tree():
-    with open(os.path.abspath("../Aechive/our_text.txt"))as file:
+    with open(os.path.abspath(file_path))as file:
         sentences = []
         for line in file.readlines():
             if line == "\n":
