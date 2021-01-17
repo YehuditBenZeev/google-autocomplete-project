@@ -1,3 +1,5 @@
+from auto_complete_data import SentenceData, AutoCompleteData
+
 
 class TrieNode:
     def __init__(self):
@@ -6,6 +8,7 @@ class TrieNode:
         self.last = False
         self.father = None
         self.father_letter = ''
+        self.sentence_item = None
 
 
 class Tree:
@@ -19,10 +22,11 @@ class Tree:
         """ Forms a trie structure with the given set of strings
         if it does not exists already else it merges the key
         into it by extending the structure as required"""
-        for letter in data_sentences:
-            self.insert(letter)  # inserting one key to the trie.
+        for line, sentence in enumerate(data_sentences, start=1):
+            self.insert(sentence, line, 'a file')  # inserting one key to the trie.
+            #sentence_item = SentenceData(completed_sentence=sentence, line=line, source_file='')
 
-    def insert(self, sentence):
+    def insert(self, sentence, line, file):
         """Inserts a key into trie if it does not exist already.
         And if the key is a prefix of the trie node, just
         marks it as leaf node."""
@@ -46,6 +50,7 @@ class Tree:
             self.positions[letter].add(node_current)
 
         node_current.last = True
+        node_current.sentence_item = SentenceData(line=line, source_file=file)
 
     def search(self, sentence):
         # Searches the given key in trie for a full match
@@ -75,7 +80,9 @@ class Tree:
         if node.last:
             prefix = self.suggestions_rec_backwards(original_node, '')
             full_sentence = prefix + sentence
-            self.sentence_list.append(full_sentence)
+            source_text = f"{node.sentence_item.source_file} {node.sentence_item.line}"
+            auto_complete_item = AutoCompleteData(source_text=source_text, completed_sentence=full_sentence, offset=0, score=0)
+            self.sentence_list.append(auto_complete_item)
 
         for letter, n in node.children.items():
             self.suggestions_rec(original_node, n, sentence + letter)
@@ -117,7 +124,7 @@ class Tree:
 
 if __name__ == "__main__":
     # Driver Code
-    keys = ["dog dog"]#["hello dog", "t dog hell", "dog", "dog hi", "doggi dog"]
+    keys = ["dog dog", "hello dog", "t dog hell", "dog", "dog hi", "doggi dog"]
             #"hel", "help", "helps", "helping"]  # keys to form the trie structure.
     key = "do"  # key for autocomplete suggestions.
     status = ["Not found", "Found"]
@@ -128,13 +135,14 @@ if __name__ == "__main__":
     # creating the trie structure with the
     # given set of strings.
     t.formTree(keys)
-    print(t.positions)
+    #print(t.positions)
 
 
     # autocompleting the given key using
     # our trie structure.
-    comp = t.printAllAutoSuggestions(key)
-
+    comp = t.get_all_auto_suggestions(key)
+    for s in set(comp):
+            print(s)
     if comp == -1:
         print("No other strings found with this prefix\n")
     elif comp == 0:
