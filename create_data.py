@@ -1,22 +1,22 @@
 import sys, os
 from _pytest.tmpdir import tmp_path
 sys.path.append(os.path.dirname(os.path.abspath("../Aechive/rfc7501.txt")))
+from tree import Tree
 
 
-data_dict = {}
+tree = Tree()
 
 
-def insert_to_dict():
+def create_tree():
     with open(os.path.abspath("../Aechive/our_text.txt"))as file:
+        sentences = []
         for line in file.readlines():
             if line == "\n":
                 continue
+            sentences.append(line)
 
-            # nurmelaized line
-            key = line[:5]
-            if not (key in data_dict.keys()):
-                data_dict[key] = []
-            data_dict[key].append(line)
+        tree.formTree(sentences)
+        print(tree.positions)
 
 
 def write_to_file():
@@ -24,9 +24,8 @@ def write_to_file():
 
 
 if __name__ == "__main__":
-    insert_to_dict()
-    for key in data_dict.keys():
-        print(key, ": ", data_dict[key])
+    create_tree()
+
 
 
 

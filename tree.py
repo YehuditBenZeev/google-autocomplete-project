@@ -4,6 +4,8 @@ class TrieNode:
         # Initialising one node for trie
         self.children = {}
         self.last = False
+        self.father = None
+        self.father_letter = ''
 
 
 class Tree:
@@ -24,16 +26,26 @@ class Tree:
         # Inserts a key into trie if it does not exist already.
         # And if the key is a prefix of the trie node, just
         # marks it as leaf node.
-        node = self.root
+
+
+        node_current = self.root
+        node_father = self.root
+        father_letter = ''
         for i, letter in enumerate(sentence):
-            if not node.children.get(letter):
-                node.children[letter] = TrieNode()
-            node = node.children[letter]
+            if not node_current.children.get(letter):
+                node_current.children[letter] = TrieNode()
+
+            node_current.father = node_father
+            node_current.father_letter = father_letter
+            node_father = node_current
+            node_current = node_current.children[letter]
+            father_letter = letter
+
             if not (letter in self.positions.keys()):
                 self.positions[letter] = set()
-            self.positions[letter].add(node)
+            self.positions[letter].add(node_current)
 
-        node.last = True
+        node_current.last = True
 
     def search(self, key_):
         # Searches the given key in trie for a full match
@@ -53,14 +65,21 @@ class Tree:
 
         return node and node.last and found
 
-    def suggestionsRec(self, node, word):
-        # Method to recursively traverse the trie
-        # and return a whole word.
-        if node.last:
-            self.sentence_list.append(word)
 
-        for a, n in node.children.items():  # found in the middle ??????
-            self.suggestionsRec(n, word + a)
+    def suggestionsRecBackwords(self, node, word):
+        if node.father == self.root:
+            return node.father_letter + word
+
+        return self.suggestionsRecBackwords(node.father, node.father_letter + word)
+
+    def suggestionsRec(self, original_node, node, word):
+        if node.last:
+            prefix = self.suggestionsRecBackwords(original_node, '')
+            sentence = prefix[:-2] + word
+            self.sentence_list.append(sentence)
+
+        for a, n in node.children.items():
+            self.suggestionsRec(original_node, n, word + a)
 
     def printAllAutoSuggestions(self, sentence):
         return_value = 1
@@ -68,6 +87,8 @@ class Tree:
             temp_root = TrieNode()
             temp_root.children[sentence[0]] = node
             return_value = self.printAutoSuggestions(sentence, temp_root)
+            if return_value == 1:
+                break
         for s in self.sentence_list:
             print(s)
         return return_value
@@ -93,34 +114,35 @@ class Tree:
             return 0
         elif node.last and not node.children:
             return -1
-
-        self.suggestionsRec(node, temp_word)
+        print("132")
+        self.suggestionsRec(node, node, temp_word)
 
         return 1
 
 
-# Driver Code
-keys = ["hello dog", "dog", "dog hell", "cat", "a",
-        "hel", "help", "helps", "helping"]  # keys to form the trie structure.
-key = "do"  # key for autocomplete suggestions.
-status = ["Not found", "Found"]
+if __name__ == "__main__":
+    # Driver Code
+    keys = ["hello dog", "dog", "t dog hell", "cat", "a",  # "t dog hell"
+            "hel", "help", "helps", "helping"]  # keys to form the trie structure.
+    key = "do"  # key for autocomplete suggestions.
+    status = ["Not found", "Found"]
 
-# creating trie object
-t = Tree()
+    # creating trie object
+    t = Tree()
 
-# creating the trie structure with the
-# given set of strings.
-t.formTree(keys)
-print(t.positions)
+    # creating the trie structure with the
+    # given set of strings.
+    t.formTree(keys)
+    print(t.positions)
 
 
-# autocompleting the given key using
-# our trie structure.
-comp = t.printAllAutoSuggestions(key)
+    # autocompleting the given key using
+    # our trie structure.
+    comp = t.printAllAutoSuggestions(key)
 
-if comp == -1:
-    print("No other strings found with this prefix\n")
-elif comp == 0:
-    print("No string found with this prefix\n")
+    if comp == -1:
+        print("No other strings found with this prefix\n")
+    elif comp == 0:
+        print("No string found with this prefix\n")
 
-# This code is contributed by amurdia
+    # This code is contributed by amurdia

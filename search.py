@@ -1,14 +1,15 @@
 from auto_complete import get_best_k_completions
-from create_data import insert_to_dict, data_dict
+from create_data import create_tree, tree
 
 
 def search_cln():
     print("Loading and prep..")
-    # insert_to_dict()
+    create_tree()
     print("System is ready, enter text")
     text = input()
-    completions = get_best_k_completions(text)
-    print_completions(completions)
+    get_best_k_completions(text)
+    # completions = get_best_k_completions(text)
+    # print_completions(completions)
 
 
 def print_completions(completions):
@@ -17,5 +18,3 @@ def print_completions(completions):
 
 if __name__ == "__main__":
     search_cln()
-    for key in data_dict.keys():
-        print(key, ": ", data_dict[key])
