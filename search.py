@@ -17,3 +17,5 @@ def print_completions(completions):
 
 if __name__ == "__main__":
     search_cln()
+    for key in data_dict.keys():
+        print(key, ": ", data_dict[key])
