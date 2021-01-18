@@ -2,7 +2,7 @@ import sys, os
 from _pytest.tmpdir import tmp_path
 sys.path.append(os.path.dirname(os.path.abspath("../Aechive/rfc7501.txt")))
 from tree import Tree
-from config import file_path
+# from config import file_path
 
 tree = Tree()
 
@@ -24,20 +24,25 @@ def open_files():
                 if line == "\n":
                     continue
                 all_lines.append(line)
-    print(len(all_lines))
+    # print(len(all_lines))
+    return all_lines
     
 
-def create_tree():
-    with open(os.path.abspath(file_path))as file:
-        sentences = []
-        for line in file.readlines():
-            if line == "\n":
-                continue
-            line = line.replace('\n', '')
-            sentences.append(line)
+# def create_tree():
+#     with open(os.path.abspath(file_path))as file:
+#         sentences = []
+#         for line in file.readlines():
+#             if line == "\n":
+#                 continue
+#             line = line.replace('\n', '')
+#             sentences.append(line)
 
-        tree.formTree(sentences)
-        print(tree.positions)
+#         tree.formTree(sentences)
+#         print(tree.positions)
+
+def create_tree():
+    all_lines = open_files()
+    tree.formTree(all_lines)
 
 
 def write_to_file():
