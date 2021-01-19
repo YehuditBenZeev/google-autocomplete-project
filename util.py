@@ -18,5 +18,14 @@ def print_suggestions(sentence_suggestion_list):
         print(f"{i}. {autocomplete_item.completed_sentence} (source file:{autocomplete_item.source_text})")
 
 
-def calculate_score():
+def get_shortened_sentence(sentence, sen_len):
+    wort_list = sentence.split()
+    if len(wort_list) < sen_len:
+        return sentence
+    short_sentence = " ".join(wort_list[:sen_len])
+    return short_sentence
+
+
+def calculate_score(sentence_suggestion):
     pass
+

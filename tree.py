@@ -1,5 +1,6 @@
 from auto_complete_data import SentenceData, AutoCompleteData
-from util import get_clean_line
+from util import get_clean_line, get_shortened_sentence
+import json
 
 
 class TrieNode:
@@ -9,7 +10,7 @@ class TrieNode:
         self.last = False
         self.father = None
         self.father_letter = ''
-        self.sentence_item = None
+        self.auto_complete_data_list = []
 
 
 class Tree:
@@ -36,7 +37,8 @@ class Tree:
         node_father = self.root
         father_letter = ''
         sentence = get_clean_line(auto_complete_data_item.completed_sentence)
-        for i, letter in enumerate(sentence):
+        short_sentence = get_shortened_sentence(sentence, 10)
+        for i, letter in enumerate(short_sentence):
             if not node_current.children.get(letter):
                 node_current.children[letter] = TrieNode()
 
@@ -52,42 +54,43 @@ class Tree:
             self.positions[letter].add(node_current)
 
         node_current.last = True
-        node_current.sentence_item = auto_complete_data_item
+        node_current.auto_complete_data_list.append(AutoCompleteData(auto_complete_data_item.completed_sentence, auto_complete_data_item.source_text, auto_complete_data_item.offset, auto_complete_data_item.score))
+        # node_current.sentence_item = auto_complete_data_item
 
-    def search(self, sentence):
-        # Searches the given key in trie for a full match
-        # and returns True on success else returns False.
-        node = self.root
-        found = True
+    # def search(self, sentence):
+    #     # Searches the given key in trie for a full match
+    #     # and returns True on success else returns False.
+    #     node = self.root
+    #     found = True
+    #
+    #     # for a in list(key):
+    #     for i, a in enumerate(sentence):
+    #         print(i, ", ", a, end=", ")
+    #         if not node.children.get(a):
+    #             found = False
+    #             break
+    #         node = node.children[a]
+    #         print(" ")
+    #     print(" ")
+    #
+    #     return node and node.last and found
 
-        # for a in list(key):
-        for i, a in enumerate(sentence):
-            print(i, ", ", a, end=", ")
-            if not node.children.get(a):
-                found = False
-                break
-            node = node.children[a]
-            print(" ")
-        print(" ")
-
-        return node and node.last and found
-
-    def suggestions_rec_backwards(self, node, sentence):
-        if node.father is None:
-            return node.father_letter + sentence
-
-        return self.suggestions_rec_backwards(node.father, node.father_letter + sentence)
-
-    def suggestions_rec(self, original_node, node, sentence):
-        if node.last:
-            prefix = self.suggestions_rec_backwards(original_node, '')
-            full_sentence = prefix + sentence
-            # source_text = f"{node.sentence_item.source_file} {node.sentence_item.line}"
-            # auto_complete_item = AutoCompleteData(source_text=source_text, completed_sentence=full_sentence, offset=0, score=0)
-            self.sentence_list.append(node.sentence_item)
-
-        for letter, n in node.children.items():
-            self.suggestions_rec(original_node, n, sentence + letter)
+    # def suggestions_rec_backwards(self, node, sentence):
+    #     if node.father is None:
+    #         return node.father_letter + sentence
+    #
+    #     return self.suggestions_rec_backwards(node.father, node.father_letter + sentence)
+    #
+    # def suggestions_rec(self, original_node, node, sentence):
+    #     if node.last:
+    #         prefix = self.suggestions_rec_backwards(original_node, '')
+    #         full_sentence = prefix + sentence
+    #         # source_text = f"{node.sentence_item.source_file} {node.sentence_item.line}"
+    #         # auto_complete_item = AutoCompleteData(source_text=source_text, completed_sentence=full_sentence, offset=0, score=0)
+    #         self.sentence_list.append(node.sentence_item)
+    #
+    #     for letter, n in node.children.items():
+    #         self.suggestions_rec(original_node, n, sentence + letter)
 
     def get_all_auto_suggestions(self, sentence):
         self.sentence_list = []
@@ -101,59 +104,34 @@ class Tree:
         return self.sentence_list
 
     def get_node_auto_suggestions(self, sentence, node):
-        # Returns all the words in the trie whose common
-        # prefix is the given key thus listing out all
-        # the suggestions for autocomplete.
-
         not_found = False
-        temp_word = ''
-        first_node = node.children.get(sentence[0])
-        # for a in list(key_):
+        # temp_word = ''
+        # first_node = node.children.get(sentence[0])
+
         for i, letter in enumerate(sentence):
             if not node.children.get(letter):
                 not_found = True
                 break
 
-            temp_word += letter
+            # temp_word += letter
             node = node.children[letter]
         if not_found:
             return 0
         elif node.last and not node.children:
             return -1
-        self.suggestions_rec(first_node, node, temp_word)
 
+        # self.suggestions_rec(first_node, node, temp_word)
+        self.get_complete_suggestion(node)
         return 1
 
+    def get_complete_suggestion(self, node):
+        if node.last:
+            # source_text = f"{node.sentence_item.source_file} {node.sentence_item.line}"
+            # auto_complete_item = AutoCompleteData(source_text=source_text, completed_sentence=full_sentence, offset=0, score=0)
+            for item in node.auto_complete_data_list:
+                self.sentence_list.append(item)
+            return
 
-if __name__ == "__main__":
-    # # Driver Code
-    # keys = ["dog dog", "hello dog", "t dog hell", "dog", "dog hi", "doggi dog"]
-    #         #"hel", "help", "helps", "helping"]  # keys to form the trie structure.
-    # key = "do"  # key for autocomplete suggestions.
-    # status = ["Not found", "Found"]
-    #
-    # # creating trie object
-    # t = Tree()
-    #
-    # # creating the trie structure with the
-    # # given set of strings.
-    # t.formTree(keys)
-    # #print(t.positions)
-    #
-    #
-    # # autocompleting the given key using
-    # # our trie structure.
-    # comp = t.get_all_auto_suggestions(key)
-    # for s in set(comp):
-    #         print(s)
-    # if comp == -1:
-    #     print("No other strings found with this prefix\n")
-    # elif comp == 0:
-    #     print("No string found with this prefix\n")
-    #
-    # # This code is contributed by amurdia
-    # line = "buyhi      jkg@#$/.' f"
-    # clean_line = get_clean_line(line)
-    # print(line)
-    # print(clean_line)
-    pass
+        for letter, n in node.children.items():
+            self.get_complete_suggestion(n)
+
