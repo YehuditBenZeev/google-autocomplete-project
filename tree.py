@@ -1,5 +1,5 @@
-from auto_complete_data import SentenceData, AutoCompleteData
-from util import get_clean_line, get_shortened_sentence
+from auto_complete_data import SentenceData
+from util import get_clean_sentence, get_shortened_sentence, from_sentence_to_auto_complete
 import json
 
 
@@ -10,7 +10,7 @@ class TrieNode:
         self.last = False
         self.father = None
         self.father_letter = ''
-        self.auto_complete_data_list = []
+        self.sentence_data_list = []
 
 
 class Tree:
@@ -20,15 +20,15 @@ class Tree:
         self.sentence_list = []
         self.positions = {}
 
-    def formTree(self, auto_complete_data_list):
+    def formTree(self, sentence_data_list):
         """ Forms a trie structure with the given set of strings
         if it does not exists already else it merges the key
         into it by extending the structure as required"""
-        for auto_complete_data_item in auto_complete_data_list:
-            self.insert(auto_complete_data_item)  # inserting one key to the trie.
-            #sentence_item = SentenceData(completed_sentence=sentence, line=line, source_file='')
+        for sentence_data_item in sentence_data_list:
+            self.insert(sentence_data_item)  # inserting one key to the trie.
+            # sentence_item = SentenceData(completed_sentence=sentence, line=line, source_file='')
 
-    def insert(self, auto_complete_data_item):
+    def insert(self, sentence_data_item):
         """Inserts a key into trie if it does not exist already.
         And if the key is a prefix of the trie node, just
         marks it as leaf node."""
@@ -36,7 +36,7 @@ class Tree:
         node_current = self.root
         node_father = self.root
         father_letter = ''
-        sentence = get_clean_line(auto_complete_data_item.completed_sentence)
+        sentence = get_clean_sentence(sentence_data_item.completed_sentence)
         short_sentence = get_shortened_sentence(sentence, 10)
         for i, letter in enumerate(short_sentence):
             if not node_current.children.get(letter):
@@ -54,7 +54,7 @@ class Tree:
             self.positions[letter].add(node_current)
 
         node_current.last = True
-        node_current.auto_complete_data_list.append(AutoCompleteData(auto_complete_data_item.completed_sentence, auto_complete_data_item.source_text, auto_complete_data_item.offset, auto_complete_data_item.score))
+        node_current.sentence_data_list.append(SentenceData(sentence_data_item.completed_sentence, sentence_data_item.source_text))
         # node_current.sentence_item = auto_complete_data_item
 
     # def search(self, sentence):
@@ -101,7 +101,8 @@ class Tree:
                     temp_root.children[sentence[0]] = node
                     self.get_node_auto_suggestions(sentence, temp_root)
 
-        return self.sentence_list
+        return from_sentence_to_auto_complete(self.sentence_list)
+
 
     def get_node_auto_suggestions(self, sentence, node):
         not_found = False
@@ -128,7 +129,7 @@ class Tree:
         if node.last:
             # source_text = f"{node.sentence_item.source_file} {node.sentence_item.line}"
             # auto_complete_item = AutoCompleteData(source_text=source_text, completed_sentence=full_sentence, offset=0, score=0)
-            for item in node.auto_complete_data_list:
+            for item in node.sentence_data_list:
                 self.sentence_list.append(item)
             return
 

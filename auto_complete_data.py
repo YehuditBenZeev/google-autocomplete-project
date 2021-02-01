@@ -23,5 +23,5 @@ class AutoCompleteData:
 @dataclass
 class SentenceData:
    # completed_sentence: str
-    source_file: str
-    line: int
+    completed_sentence: str
+    source_text: str

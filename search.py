@@ -1,6 +1,7 @@
 from auto_complete import get_best_k_completions
 from create_data import create_tree, tree
 import util
+import time
 
 
 def search_cln():
@@ -12,9 +13,13 @@ def search_cln():
         current_text = input()
         while current_text != '#':
             text += current_text
-            clean_text = util.get_clean_line(text)
+            clean_text = util.get_clean_sentence(text)
             print(clean_text)
+
+            start_time = time.time()
             sentence_suggestion_list = get_best_k_completions(clean_text)
+            print("--- %s seconds ---" % (time.time() - start_time))
+
             util.print_suggestions(sentence_suggestion_list)
             print(text)
             current_text = input()
