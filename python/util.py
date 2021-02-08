@@ -41,24 +41,18 @@ def get_shortened_sentence(sentence, sen_len):
 
 
 def update_score(auto_complete_data_list, prefix_len, index=-1, is_replaced=False):
-    # print("update_score: ", prefix_len, index, is_replaced)
-
     for item in auto_complete_data_list:
         if not item.score == 0:
             continue
-        print(item.score, index, item.completed_sentence, end=", ")
         item.score = prefix_len * 2
-        print(item.score, end=", ")
         if not index == -1:
             if is_replaced:
                 item.score -= 5 - index if 5 - index > 1 else 1
             else:
                 item.score -= (5 - index)*2 if 5 - index > 1 else 2
-        print(item.score)
 
 
 def replacer(old_string, new_string, index):
-    # print("replacer: ", old_string, new_string, index)
     # raise an error if index is outside of the string
     if index >= len(old_string) or index < 0:
         raise ValueError("index outside given string")
@@ -74,9 +68,11 @@ def from_sentence_to_auto_complete(sentence_list):
 
     return auto_complete_list
 
+#def get_sub_sentence
+
+
 if __name__ == "__main__":
     s = "abc def"
     s1 = replacer(s, 'qa', 5)
     print(s1)
     print(len(s1))
-
